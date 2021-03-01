@@ -11,13 +11,13 @@ print(f"started at {time.strftime('%X')}")
 
 def scrape():
     url = "https://eteenindus.mnt.ee/public/vabadSoidueksamiajad.xhtml"
-    cache_times = []
+    
     with open('ark-bot-rewritten/cache.json', "r") as read_file:
         old_times = json.load(read_file)
 
     html = requests.get(url)
-    soup = BeautifulSoup(html.text, "lxml")
-
+    soup = BeautifulSoup(html.text, "html.parser")
+    new_times = []
     for tr in soup.findAll('tr')[1:]:
         tds = tr.findAll('td')
         location = tds[0].string
@@ -32,14 +32,14 @@ def scrape():
             "3": third_available,
             "Link": 'eteenindus.mnt.ee/main.jsf'
         }
+        
+        new_times.append(table_row)
 
-        cache_times.append(table_row)
-
-    for diff in cache_times:
+    for diff in new_times:
         if diff not in old_times:
 
             with open('ark-bot-rewritten/cache.json', 'w') as f:
-                json.dump(cache_times, f)
+                json.dump(new_times, f)
 
             return diff
 
@@ -75,4 +75,4 @@ while 1:
 
     scrape()
     sendTweet()
-    time.sleep(10)
+    time.sleep(5)
